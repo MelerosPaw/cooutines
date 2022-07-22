@@ -6,12 +6,19 @@ interface HipotecaUseCase {
     suspend operator fun invoke(entradaPiso: Double): Boolean
 }
 
-class HipotecaUseCaseImpl : HipotecaUseCase {
+class HipotecaUseCaseImpl(
+    private val calculadora: Calculadora,
+) : HipotecaUseCase {
+
+    companion object {
+        private const val ENTRADA_MINIMA = 20_000.0
+    }
 
     override suspend operator fun invoke(entradaPiso: Double): Boolean {
         delay(3000L)
-
-        return medianteVariasCorrutinas(entradaPiso)
+        val resultado = calculadora.restar(entradaPiso, ENTRADA_MINIMA) > 0
+        return resultado
+//        return medianteVariasCorrutinas(entradaPiso)
     }
 
     // Si lanzas withContext() con el mismo Dispatcher, mantiene el hilo y no añade coste

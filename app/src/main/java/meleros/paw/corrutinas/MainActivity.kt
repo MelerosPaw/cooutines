@@ -6,7 +6,8 @@ import androidx.annotation.LayoutRes
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : BaseActivity() {
 
@@ -26,6 +27,7 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         boton.setOnClickListener {
 //            startActivity(Intent(this, OtherActivity::class.java))
 //            viewModel?.cancelarJob()

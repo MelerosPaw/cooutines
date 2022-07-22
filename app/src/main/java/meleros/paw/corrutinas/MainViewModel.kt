@@ -3,11 +3,20 @@ package meleros.paw.corrutinas
 import android.graphics.DiscretePathEffect
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
+import meleros.paw.corrutinas.di.DIManager
 import java.lang.IllegalStateException
 import java.lang.RuntimeException
+import javax.inject.Inject
 import kotlin.concurrent.thread
 
 class MainViewModel : BaseViewModel() {
+
+    @Inject
+    lateinit var hipotecaUseCase: HipotecaUseCase
+
+    init {
+        DIManager.getAppComponent().inject(this)
+    }
 
     fun corrutina() {
         viewModelScope.launch(Dispatchers.Default) {
@@ -517,16 +526,15 @@ class MainViewModel : BaseViewModel() {
     }
 
     fun logicaDeNegocioHipoteca() {
-        val useCaseInyectado: HipotecaUseCase = HipotecaUseCaseImpl()
+        val miDinero = 50_000.0
 
         viewModelScope.launch {
-            val puedoPedirHipoteca = useCaseInyectado(2_000.0)
-
-            val texto = if (puedoPedirHipoteca) {
-                "Compra"
+            val texto = if (hipotecaUseCase(miDinero)) {
+                "Compra!!!"
             } else {
                 "Te va' comé una mierda"
             }
+
             _textLiveData.value = texto
             _loadingLiveData.value = false
         }
