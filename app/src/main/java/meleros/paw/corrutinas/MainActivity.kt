@@ -60,9 +60,9 @@ class MainActivity : BaseActivity() {
             // Solo tiene sentido cuando queremos esperar a que termine algo que se va a ejecutar de forma asíncrona.
 //            vm.hacerAlgoSuspendiendo()
 
-            vm.laIt()
+//            vm.laIt()
             // Las funciones de suspensión siempre esperan el completado de las corrutinas hija
-//            vm.esperarCompletado()
+            vm.esperarCompletado()
 
             // Si ejecutas una en el hilo principal, el hilo se va a bloquear
 //            vm.bloquearHiloPrincipal()
