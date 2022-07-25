@@ -1,6 +1,5 @@
 package meleros.paw.corrutinas
 
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import androidx.annotation.LayoutRes
@@ -30,7 +29,7 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
         boton.setOnClickListener {
-            startActivity(Intent(this, OtherActivity::class.java))
+//            startActivity(Intent(this, OtherActivity::class.java))
 //            viewModel?.cancelarJob()
 //            viewModel?.delayEstaConfabuladoConElMain()
         }
