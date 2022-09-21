@@ -1,13 +1,17 @@
 package meleros.paw.corrutinas
 
 import android.graphics.DiscretePathEffect
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
 import meleros.paw.corrutinas.di.DIManager
 import java.lang.IllegalStateException
+import java.lang.NumberFormatException
 import java.lang.RuntimeException
 import javax.inject.Inject
 import kotlin.concurrent.thread
+import kotlin.coroutines.CoroutineContext
 
 class MainViewModel : BaseViewModel() {
 
@@ -337,104 +341,6 @@ class MainViewModel : BaseViewModel() {
         jobPadre2.invokeOnCompletion { printWithTag("Se acabó") }
     }
 
-    fun noSeCancelaSiNoComprobamosSiEstaActivo() {
-        jobPadre2 = viewModelScope.launch(Dispatchers.Default) {
-
-            launch {
-                medirTiempo {
-                    repeat(500_000_000) { // Tarda 6 segundos
-                        ensureActive()
-                        repeat(2) {}
-                    }
-                    printWithTag("Launch 3")
-                }
-            }
-
-            delay(2000L)
-            jobPadre2.cancel()
-        }
-        jobPadre2.invokeOnCompletion { printWithTag("Se acabó") }
-    }
-
-    fun seCancelaConWithContext() {
-        jobPadre2 = viewModelScope.launch(Dispatchers.Default) {
-
-            launch {
-                medirTiempo {
-                    repeat(2_000_000) { // Tarda 4 segundos
-                        withContext(Dispatchers.Default) {
-
-                        }
-                    }
-                    printWithTag("Launch 3")
-                }
-            }
-
-            delay(2000L)
-            jobPadre2.cancel()
-        }
-    }
-
-    fun seCancelaPorLanzarOtraCorrutina() {
-        jobPadre2 = viewModelScope.launch(Dispatchers.Default) {
-
-            launch {
-                medirTiempo {
-                    repeat(2_000_000_000) {} // Tarda 3 segundos
-
-                    launch { printWithTag("Launch 3") }
-
-                    printWithTag("Launch 3.2")
-                }
-            }
-
-            delay(2000L)
-//            jobPadre2.cancel()
-        }
-    }
-
-    fun seCancelaPorDelay() {
-        jobPadre2 = viewModelScope.launch(Dispatchers.Default) {
-
-            launch {
-                medirTiempo {
-                    repeat(3_000) { // Tarda 4 segundos
-                        delay(1L)
-                    }
-                    printWithTag("Launch 3")
-                }
-            }
-
-            delay(2000L)
-//            jobPadre2.cancel()
-        }
-    }
-
-    fun noSeCancelaPorSuspension() {
-        jobPadre2 = viewModelScope.launch(Dispatchers.Default) {
-
-            launch {
-                medirTiempo {
-                    repeat(40_000_000) { // Tarda 4 segundos
-                        suspensionVacia()
-                    }
-                    printWithTag("Launch 3")
-                }
-            }
-
-            delay(2000L)
-//            jobPadre2.cancel()
-        }
-    }
-
-    suspend fun suspensionVacia() {
-        otraVacia()
-    }
-
-    suspend fun otraVacia() {
-        print("")
-    }
-
     lateinit var jobPadre3: Job
 
     fun romperLaConcurrenciaEstructurada() {
@@ -573,42 +479,126 @@ class MainViewModel : BaseViewModel() {
         }
     }
 
-    @ExperimentalStdlibApi
-    fun comprobarDispatchers(coroutineScope: CoroutineScope) {
-        GlobalScope.launch {
-            printWithTag("Global scope: ${coroutineContext[CoroutineDispatcher]}")
-        }
-
-        viewModelScope.launch {
-            printWithTag("View model scope: ${coroutineContext[CoroutineDispatcher]}")
-            withContext(Dispatchers.IO) {
-                printWithTag("withContext: ${coroutineContext[CoroutineDispatcher]}")
-            }
-            Job()
-        }
-
-        coroutineScope.launch {
-            printWithTag("Lifecycle scope: ${coroutineContext[CoroutineDispatcher]}")
+    fun tryCatch() {
+        viewModelScope.launch(Dispatchers.Default) {
+            "Texto".toInt()
         }
     }
 
     fun exceptionHandler() {
-        val handler = CoroutineExceptionHandler { context, throwable ->
-            printWithTag("${throwable.message}")
+        viewModelScope.launch(Dispatchers.Default) {
+            "Texto".toInt()
         }
+    }
 
-        val job = viewModelScope.launch(handler + Dispatchers.Default) {
-            try {
-                repeat(500_000_000) { // Tarda mucho tiempo
+    fun cancelarYCooperar() {
+        viewModelScope.launch(Dispatchers.Default) {
+            launch {
+                while (true) {
+                    printWithTag("Estoy viva")
                 }
-                ensureActive()
-                printWithTag("Fin")
-            } catch (t: Throwable) {
-                printWithTag("${t is CancellationException}")  // -> true
+
+                printWithTag("Se acabó el launch hijo")
             }
         }
-        repeat(5_000_000) {}
-        job.cancel()
+    }
+
+    fun noSeCancelaSiNoComprobamosSiEstaActivo() {
+        jobPadre2 = viewModelScope.launch(Dispatchers.Default) {
+
+            launch {
+                medirTiempo {
+                    repeat(500_000_000) { // Tarda 6 segundos
+                        ensureActive()
+                        repeat(2) {}
+                    }
+                    printWithTag("Launch 3")
+                }
+            }
+
+            delay(2000L)
+            jobPadre2.cancel()
+        }
+        jobPadre2.invokeOnCompletion { printWithTag("Se acabó") }
+    }
+
+    fun seCancelaConWithContext() {
+        jobPadre2 = viewModelScope.launch(Dispatchers.Default) {
+
+            launch {
+                medirTiempo {
+                    repeat(2_000_000) { // Tarda 4 segundos
+                        withContext(Dispatchers.Default) {
+
+                        }
+                    }
+                    printWithTag("Launch 3")
+                }
+            }
+
+            delay(2000L)
+            jobPadre2.cancel()
+        }
+    }
+
+    fun seCancelaPorLanzarOtraCorrutina() {
+        jobPadre2 = viewModelScope.launch(Dispatchers.Default) {
+
+            launch {
+                medirTiempo {
+                    repeat(2_000_000_000) {} // Tarda 3 segundos
+
+                    launch { printWithTag("Launch 3") }
+
+                    printWithTag("Launch 3.2")
+                }
+            }
+
+            delay(2000L)
+//            jobPadre2.cancel()
+        }
+    }
+
+    fun seCancelaPorDelay() {
+        jobPadre2 = viewModelScope.launch(Dispatchers.Default) {
+
+            launch {
+                medirTiempo {
+                    repeat(3_000) { // Tarda 4 segundos
+                        delay(1L)
+                    }
+                    printWithTag("Launch 3")
+                }
+            }
+
+            delay(2000L)
+//            jobPadre2.cancel()
+        }
+    }
+
+    fun noSeCancelaPorSuspension() {
+        jobPadre2 = viewModelScope.launch(Dispatchers.Default) {
+
+            launch {
+                medirTiempo {
+                    repeat(40_000_000) { // Tarda 4 segundos
+                        suspensionVacia()
+                    }
+                    printWithTag("Launch 3")
+                }
+            }
+
+            delay(2000L)
+//            jobPadre2.cancel()
+        }
+    }
+
+    suspend fun suspensionVacia() {
+        otraVacia()
+    }
+
+    suspend fun otraVacia() {
+        print("")
     }
 
     private fun llamaAUnWS() = 3
@@ -641,6 +631,25 @@ class MainViewModel : BaseViewModel() {
         }
 
         listOf(res1, res2)
+    }
+
+    @ExperimentalStdlibApi
+    fun comprobarDispatchers(coroutineScope: CoroutineScope) {
+        GlobalScope.launch {
+            printWithTag("Global scope: ${coroutineContext[CoroutineDispatcher]}")
+        }
+
+        viewModelScope.launch {
+            printWithTag("View model scope: ${coroutineContext[CoroutineDispatcher]}")
+            withContext(Dispatchers.IO) {
+                printWithTag("withContext: ${coroutineContext[CoroutineDispatcher]}")
+            }
+            Job()
+        }
+
+        coroutineScope.launch {
+            printWithTag("Lifecycle scope: ${coroutineContext[CoroutineDispatcher]}")
+        }
     }
 
     fun laIt() {

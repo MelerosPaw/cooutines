@@ -55,6 +55,11 @@ open class BaseViewModel : ViewModel() {
         return doubleToString(millis)
     }
 
+    protected fun printAndPost(text: String) {
+        _textLiveData.postValue(text)
+        printWithTag(text)
+    }
+
     private fun doubleToString(millis: Double): String {
         val formatter = DecimalFormat.getInstance()
         formatter.maximumFractionDigits = 3

@@ -1,5 +1,6 @@
 package meleros.paw.corrutinas
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import androidx.annotation.LayoutRes
@@ -29,7 +30,7 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
         boton.setOnClickListener {
-//            startActivity(Intent(this, OtherActivity::class.java))
+            startActivity(Intent(this, OtherActivity::class.java))
 //            viewModel?.cancelarJob()
 //            viewModel?.delayEstaConfabuladoConElMain()
         }
@@ -60,9 +61,22 @@ class MainActivity : BaseActivity() {
             // Solo tiene sentido cuando queremos esperar a que termine algo que se va a ejecutar de forma asíncrona.
 //            vm.hacerAlgoSuspendiendo()
 
-            vm.laIt()
             // Las funciones de suspensión siempre esperan el completado de las corrutinas hija
 //            vm.esperarCompletado()
+
+            // Excepciones en corrutinas
+            // Usar un try-catch
+//            vm.tryCatch()
+
+            // O un CoroutineExceptionHandler
+//            vm.exceptionHandler()
+
+            // Cancelación
+            // Cancelar es cooperativo
+//            vm.cancelarYCooperar()
+
+            // Cooperar siempre antes de los procesos costosos
+
 
             // Si ejecutas una en el hilo principal, el hilo se va a bloquear
 //            vm.bloquearHiloPrincipal()
