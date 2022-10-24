@@ -15,6 +15,7 @@ open class AppModule {
     }
 
     @Provides
+    @Singleton
     open fun provideHipotecaUseCase(calculadora: Calculadora): HipotecaUseCase {
         return HipotecaUseCaseImpl(calculadora)
     }
