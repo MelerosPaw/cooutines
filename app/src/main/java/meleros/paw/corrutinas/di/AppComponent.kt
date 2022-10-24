@@ -1,6 +1,7 @@
 package meleros.paw.corrutinas.di
 
 import dagger.Component
+import meleros.paw.corrutinas.HipotecaUseCase
 import meleros.paw.corrutinas.HipotecaUseCaseImpl
 import meleros.paw.corrutinas.MainFragment
 import meleros.paw.corrutinas.MainViewModel

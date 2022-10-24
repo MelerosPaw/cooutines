@@ -30,7 +30,12 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
         boton.setOnClickListener {
+            // Java
+//            startActivity(Intent(this, ActivityB::class.java))
+
+            // Kotlin
             startActivity(Intent(this, OtherActivity::class.java))
+
 //            viewModel?.cancelarJob()
 //            viewModel?.delayEstaConfabuladoConElMain()
         }
@@ -77,6 +82,19 @@ class MainActivity : BaseActivity() {
 
             // Cooperar siempre antes de los procesos costosos
 
+            // Funciones de suspensión cooperativas con la cancelación
+            vm.seCancelaConDelay()
+//            vm.seCancelaConWithContext()
+//            vm.seCancelaTrasCoroutineScope()
+//            vm.noSeCancelaPorLanzarOtraCorrutinaPeroNoSeLanzan()
+//            vm.noSeCancelaPorSuspension()
+
+            // No debemos cancelar scopes gestionados por Android
+//            vm.nuncaCancelarScopesGestionados()
+
+            // Solo cancelamos el interno o el nuestro
+//            vm.cancelarScopesInternos()
+//            vm.cancelarScopesPropios()
 
             // Si ejecutas una en el hilo principal, el hilo se va a bloquear
 //            vm.bloquearHiloPrincipal()
@@ -112,22 +130,8 @@ class MainActivity : BaseActivity() {
             // Ejemplo de varios hijos
 //            vm.corrutinaConVariosHijos()
 
-            // La cancelación debe ser cooperativa
-//            vm.noSeCancelaSiNoComprobamosSiEstaActivo()
-//            vm.seCancelaConWithContext()
-//            vm.seCancelaPorLanzarOtraCorrutina()
-//            vm.seCancelaPorDelay()
-//            vm.noSeCancelaPorSuspension()
-
             // Es muy fácil cargarnos la concurrencia estructurada
 //            vm.romperLaConcurenciaEstructurada()
-
-            // No debemos cancelar scopes gestionados por Android
-//            vm.nuncaCancelarScopesGestionados()
-
-            // Solo cancelamos el interno o el nuestro
-//            vm.cancelarScopesInternos()
-//            vm.cancelarScopesPropios()
 
             // No son tan concurrentes como deberían
 //            vm.cuantaConcurrenciaHayEnLasCorrutinas()

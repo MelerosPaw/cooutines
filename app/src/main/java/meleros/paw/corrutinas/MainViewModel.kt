@@ -1,17 +1,11 @@
 package meleros.paw.corrutinas
 
-import android.graphics.DiscretePathEffect
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
 import meleros.paw.corrutinas.di.DIManager
-import java.lang.IllegalStateException
 import java.lang.NumberFormatException
-import java.lang.RuntimeException
 import javax.inject.Inject
 import kotlin.concurrent.thread
-import kotlin.coroutines.CoroutineContext
 
 class MainViewModel : BaseViewModel() {
 
@@ -203,7 +197,7 @@ class MainViewModel : BaseViewModel() {
 
     @OptIn(ExperimentalStdlibApi::class)
     fun delayEstaConfabuladoConElMain() {
-        printWithTag("¡Go!")
+        printWithTag("Go!")
 
         viewModelScope.launch(Dispatchers.Default) {
             (1..50000).forEach {
@@ -366,41 +360,6 @@ class MainViewModel : BaseViewModel() {
         jobPadre3.cancel()
     }
 
-    fun nuncaCancelarScopesGestionados() {
-        viewModelScope.cancel()
-        viewModelScope.launch {
-            printWithTag("Esto no sale")
-        }
-    }
-
-    fun cancelarScopesInternos() {
-        viewModelScope.launch {
-            cancel()
-            printWithTag("Esto no sale")
-        }
-
-        viewModelScope.launch {
-            delay(3000L)
-            printWithTag("Pero esto sí")
-        }
-    }
-
-    fun cancelarScopesPropios() {
-        val scope = CoroutineScope(Dispatchers.Default)
-
-        scope.launch {
-
-            launch {
-                printWithTag("A punto de cancelarme")
-                delay(3000L)
-                printWithTag("Cancelada, yo no me imprimo")
-            }
-
-            delay(2000L)
-            scope.cancel()
-        }
-    }
-
     fun cuantaConcurrenciaHayEnLasCorrutinas() {
         viewModelScope.launch(Dispatchers.Default) {
             repeat(10) {
@@ -481,115 +440,123 @@ class MainViewModel : BaseViewModel() {
 
     fun tryCatch() {
         viewModelScope.launch(Dispatchers.Default) {
-            "Texto".toInt()
+            try {
+                "Texto".toInt()
+            } catch (e: Throwable) {
+                printWithTag("Error controlado")
+            }
         }
     }
 
     fun exceptionHandler() {
-        viewModelScope.launch(Dispatchers.Default) {
+        val handler = CoroutineExceptionHandler { coroutineContext, throwable ->
+            printWithTag("${throwable is NumberFormatException} y $coroutineContext")
+        }
+
+        viewModelScope.launch(Dispatchers.Default + handler) {
+            // active
             "Texto".toInt()
+            // completing  // cancelling
+            // completed   // cancelled
         }
     }
 
     fun cancelarYCooperar() {
         viewModelScope.launch(Dispatchers.Default) {
-            launch {
-                while (true) {
+            val job = launch {
+                while (isActive) {
                     printWithTag("Estoy viva")
                 }
 
-                printWithTag("Se acabó el launch hijo")
+                printWithTag("Se acabó el bucle")
             }
+
+            delay(3000L)
+            job.cancel()
         }
     }
 
-    fun noSeCancelaSiNoComprobamosSiEstaActivo() {
-        jobPadre2 = viewModelScope.launch(Dispatchers.Default) {
+    fun seCancelaConDelay() {
+        viewModelScope.launch {
+            val job = launch(Dispatchers.Default) {
+                printWithTag("Activa")
 
-            launch {
-                medirTiempo {
-                    repeat(500_000_000) { // Tarda 6 segundos
-                        ensureActive()
-                        repeat(2) {}
-                    }
-                    printWithTag("Launch 3")
-                }
+                delay(3000L)
+
+                printWithTag("Completada")
             }
 
-            delay(2000L)
-            jobPadre2.cancel()
+            delay(1000L)
+            job.cancel()
+            printWithTag("Cancelada")
         }
-        jobPadre2.invokeOnCompletion { printWithTag("Se acabó") }
     }
 
     fun seCancelaConWithContext() {
-        jobPadre2 = viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch {
+            val job = launch(Dispatchers.Default) {
+                printWithTag("Activa")
+                Thread.sleep(3000L)
 
-            launch {
-                medirTiempo {
-                    repeat(2_000_000) { // Tarda 4 segundos
-                        withContext(Dispatchers.Default) {
-
-                        }
-                    }
-                    printWithTag("Launch 3")
+                withContext(Dispatchers.Default) {
+                    printWithTag("Dentro de withContext")
                 }
+
+                printWithTag("Completada")
             }
 
-            delay(2000L)
-            jobPadre2.cancel()
+            delay(1000L)
+            job.cancel()
+            printWithTag("Cancelada")
         }
     }
 
-    fun seCancelaPorLanzarOtraCorrutina() {
-        jobPadre2 = viewModelScope.launch(Dispatchers.Default) {
+    fun seCancelaTrasCoroutineScope() {
+        viewModelScope.launch {
+            val job = launch(Dispatchers.Default) {
+                printWithTag("Activa")
+                Thread.sleep(3000L)
 
-            launch {
-                medirTiempo {
-                    repeat(2_000_000_000) {} // Tarda 3 segundos
-
-                    launch { printWithTag("Launch 3") }
-
-                    printWithTag("Launch 3.2")
+                coroutineScope {
+                    printWithTag("Dentro de coroutineScope")
                 }
+
+                printWithTag("Completada")
             }
 
-            delay(2000L)
-//            jobPadre2.cancel()
+            delay(1000L)
+            job.cancel()
+            printWithTag("Cancelada")
         }
     }
 
-    fun seCancelaPorDelay() {
-        jobPadre2 = viewModelScope.launch(Dispatchers.Default) {
-
-            launch {
-                medirTiempo {
-                    repeat(3_000) { // Tarda 4 segundos
-                        delay(1L)
-                    }
-                    printWithTag("Launch 3")
-                }
+    fun noSeCancelaPorLanzarOtraCorrutinaPeroNoSeLanzan() {
+        viewModelScope.launch(Dispatchers.Default) {
+            val job = launch {
+                printWithTag("Activa")
+                Thread.sleep(3000L)
+                launch { printWithTag("Me imprimo en la corrutina") }
+                printWithTag("Completada")
             }
 
-            delay(2000L)
-//            jobPadre2.cancel()
+            delay(1000L)
+            job.cancel()
+            printWithTag("Cancelada")
         }
     }
 
     fun noSeCancelaPorSuspension() {
-        jobPadre2 = viewModelScope.launch(Dispatchers.Default) {
-
-            launch {
-                medirTiempo {
-                    repeat(40_000_000) { // Tarda 4 segundos
-                        suspensionVacia()
-                    }
-                    printWithTag("Launch 3")
-                }
+        viewModelScope.launch(Dispatchers.Default) {
+            val job = launch {
+                printWithTag("Activa")
+                Thread.sleep(3000L)
+                suspensionVacia()
+                printWithTag("Completada")
             }
 
-            delay(2000L)
-//            jobPadre2.cancel()
+            delay(1000L)
+            job.cancel()
+            printWithTag("Cancelada")
         }
     }
 
@@ -598,8 +565,45 @@ class MainViewModel : BaseViewModel() {
     }
 
     suspend fun otraVacia() {
-        print("")
+        printWithTag("Me imprimo en una falsa función de suspensión")
     }
+
+    fun nuncaCancelarScopesGestionados() {
+        viewModelScope.cancel()
+        viewModelScope.launch {
+            printWithTag("Esto no sale")
+        }
+    }
+
+    fun cancelarScopesInternos() {
+        viewModelScope.launch {
+            cancel()
+            printWithTag("Esto no sale")
+        }
+
+        viewModelScope.launch {
+            delay(3000L)
+            printWithTag("Pero esto sí")
+        }
+    }
+
+    fun cancelarScopesPropios() {
+        val scope = CoroutineScope(Dispatchers.Default)
+
+        scope.launch {
+
+            launch {
+                printWithTag("A punto de cancelarme")
+                delay(3000L)
+                printWithTag("Cancelada, yo no me imprimo")
+            }
+
+            delay(2000L)
+            scope.cancel()
+        }
+    }
+
+    // TODO Melero 24/10/22: SupervisorScope
 
     private fun llamaAUnWS() = 3
 
