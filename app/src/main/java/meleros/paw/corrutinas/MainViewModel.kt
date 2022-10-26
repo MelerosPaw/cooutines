@@ -535,7 +535,9 @@ class MainViewModel : BaseViewModel() {
             val job = launch {
                 printWithTag("Activa")
                 Thread.sleep(3000L)
+
                 launch { printWithTag("Me imprimo en la corrutina") }
+
                 printWithTag("Completada")
             }
 
@@ -550,6 +552,7 @@ class MainViewModel : BaseViewModel() {
             val job = launch {
                 printWithTag("Activa")
                 Thread.sleep(3000L)
+
                 suspensionVacia()
                 printWithTag("Completada")
             }

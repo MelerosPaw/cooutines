@@ -83,14 +83,14 @@ class MainActivity : BaseActivity() {
             // Cooperar siempre antes de los procesos costosos
 
             // Funciones de suspensión cooperativas con la cancelación
-            vm.seCancelaConDelay()
+//            vm.seCancelaConDelay()
 //            vm.seCancelaConWithContext()
 //            vm.seCancelaTrasCoroutineScope()
 //            vm.noSeCancelaPorLanzarOtraCorrutinaPeroNoSeLanzan()
 //            vm.noSeCancelaPorSuspension()
 
             // No debemos cancelar scopes gestionados por Android
-//            vm.nuncaCancelarScopesGestionados()
+            vm.nuncaCancelarScopesGestionados()
 
             // Solo cancelamos el interno o el nuestro
 //            vm.cancelarScopesInternos()
