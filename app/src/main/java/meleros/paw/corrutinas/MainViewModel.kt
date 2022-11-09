@@ -458,6 +458,7 @@ class MainViewModel : BaseViewModel() {
             "Texto".toInt()
             // completing  // cancelling
             // completed   // cancelled
+            // Compleción normal  // Compleción excepcional
         }
     }
 
@@ -578,13 +579,16 @@ class MainViewModel : BaseViewModel() {
         }
     }
 
-    fun cancelarScopesInternos() {
+    fun cancelarJobsOScopesInternos() {
         viewModelScope.launch {
+            printWithTag("Entra 1")
             cancel()
+            ensureActive()
             printWithTag("Esto no sale")
         }
 
         viewModelScope.launch {
+            printWithTag("Entra 2")
             delay(3000L)
             printWithTag("Pero esto sí")
         }
@@ -594,19 +598,157 @@ class MainViewModel : BaseViewModel() {
         val scope = CoroutineScope(Dispatchers.Default)
 
         scope.launch {
+            printWithTag("A punto de cancelarme")
+            delay(3000L)
+            printWithTag("Cancelada, ya no me imprimo")
+        }
 
-            launch {
-                printWithTag("A punto de cancelarme")
-                delay(3000L)
-                printWithTag("Cancelada, yo no me imprimo")
-            }
+        Thread.sleep(1000L)
+        scope.cancel()
 
-            delay(2000L)
-            scope.cancel()
+        scope.launch {
+            printWithTag("Cancelada, yo no me imprimo")
         }
     }
 
-    // TODO Melero 24/10/22: SupervisorScope
+    fun cancelarUnAsync() {
+        viewModelScope.launch {
+
+            val ultimaFraseMariano = async(Dispatchers.Default) {
+                delay(3000L)
+                cancel()
+                "MARIANO: A por tabaco, y ahora vuelvo a ti, Encarni."
+            }
+
+            launch {
+                printAndPost("ENCARNI: ¿Dígame?")
+                delay(1000L)
+                printAndPost("MARIANO: Soy yo.")
+                delay(1000L)
+                printAndPost("ENCARNI: ¿\"Yo\" quién?")
+                delay(1000L)
+                printAndPost("MARIANO: El que se fue.")
+                delay(1000L)
+                printAndPost("ENCARNI: ¿El que se fue a dónde?")
+                delay(1000L)
+                printAndPost(ultimaFraseMariano.await())
+                delay(1000L)
+                printAndPost("ENCARNI: Pero, Mariano, ¡si yo ya me he vuelto a casar!")
+            }
+
+            delay(8000L)
+            printAndPost("Y se acabó la obra.")
+        }
+    }
+
+    fun cancelarDesdeUnaFuncionDeSuspension() {
+        viewModelScope.launch() {
+
+            launch(Dispatchers.Default) {
+                suspenderAlgo()
+
+                if (isActive) {
+                    printAndPost("Activa hasta el final")
+                }
+            }
+
+            launch(Dispatchers.Default) {
+                delay(4000L)
+                printWithTag("Han transcurrido cuatro segundos")
+            }
+        }
+    }
+
+    private suspend fun suspenderAlgo(): Job = withContext(Dispatchers.Default) {
+
+        cancel()
+
+        if (isActive) {
+            printWithTag("Sigo activa")
+        } else {
+            printWithTag("Pos me han cancelado")
+        }
+
+
+        launch(Dispatchers.Default) {
+            delay(2000L)
+            printWithTag("No me he muerto")
+        }
+    }
+
+    fun falloVsCancelacion() {
+        val ceh = CoroutineExceptionHandler { context, throwable ->
+            printAndPost(throwable.javaClass.name)
+        }
+
+        viewModelScope.launch(ceh) {
+
+            val ultimaFraseMariano = async(Dispatchers.Default) {
+                delay(3000L)
+                throw java.lang.IllegalStateException()
+                "MARIANO: A por tabaco, y ahora vuelvo a ti, Encarni."
+            }
+
+            launch {
+                printAndPost("ENCARNI: ¿Dígame?")
+                delay(1000L)
+                printAndPost("MARIANO: Soy yo.")
+                delay(1000L)
+                printAndPost("ENCARNI: ¿\"Yo\" quién?")
+                delay(1000L)
+                printAndPost("MARIANO: El que se fue.")
+                delay(1000L)
+                printAndPost("ENCARNI: ¿El que se fue a dónde?")
+                delay(1000L)
+//                printAndPost(ultimaFraseMariano.await())
+                delay(1000L)
+                printAndPost("ENCARNI: Pero, Mariano, ¡si yo ya me he vuelto a casar!")
+            }
+
+            delay(8000L)
+            printAndPost("Y se acabó la obra.")
+        }
+    }
+
+    fun serSupervisor() {
+        val ceh = CoroutineExceptionHandler { context, throwable -> }
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default + ceh)
+
+        scope.launch {
+
+            launch {
+                printWithTag("Me voy a morir")
+                throw java.lang.Exception()
+            }
+
+            launch {
+                Thread.sleep(3000L)
+                printWithTag("Yo viviré para siempre")
+            }
+
+            delay(2000L)
+            printWithTag("Esto no debería salir")
+        }
+
+        scope.launch {
+            delay(4000L)
+            printWithTag("Esto tampoco")
+        }
+    }
+
+    fun siendoSupervisor() {
+        viewModelScope.launch(Dispatchers.Default) {
+            hacerCosasSupervisadas()
+        }
+    }
+
+    private suspend fun hacerCosasSupervisadas() {
+        coroutineScope {
+            launch { throw java.lang.Exception() }
+            delay(2000L)
+            launch { printWithTag("Sigo saliendo") }
+        }
+    }
 
     private fun llamaAUnWS() = 3
 
