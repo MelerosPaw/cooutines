@@ -36,12 +36,14 @@ class OtherActivity : BaseActivity() {
         botonLibros.setOnClickListener {
             botonLibros.isEnabled = false
             val ids = listOf("1", "3", "5")
-            otherViewModel?.cooperarAntesDeCadaProcesoCostoso(ids)
+//            otherViewModel?.cooperarAntesDeCadaProcesoCostoso(ids)
+            otherViewModel?.cancelacionNormal()
+//            otherViewModel?.paranoia()
         }
     }
 
     private fun fugaDeMemoria() {
-//        Esplatoon.ids = this.ids
+//        Eswplatoon.ids = this.ids
 //        Esplatoon().nuevoHilo {
 //            Log.i("WIP", "${ids?.joinToString() ?: "Vacía"}")
 //        }

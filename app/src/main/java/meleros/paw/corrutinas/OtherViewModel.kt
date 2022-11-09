@@ -12,11 +12,11 @@ class OtherViewModel : BaseViewModel() {
 
     companion object {
         val biblioteca = listOf(
-            LibroDTO("Moby Dick", 1),
-            LibroDTO("Cuento de Navidad", 2),
-            LibroDTO("Teología aplicada al paganismo", 3),
-            LibroDTO("Sopa de ganso para el fracasado", 4),
-            LibroDTO("La sirenita", 5),
+            LibroDTO("Moby Dick", 1, "111-222-333"),
+            LibroDTO("Cuento de Navidad", 2, "111-222-333"),
+            LibroDTO("Teología aplicada al paganismo", 3, "111-222-333"),
+            LibroDTO("Sopa de ganso para el fracasado", 4, "111-222-333"),
+            LibroDTO("La sirenita", 5, "111-222-333"),
         )
     }
 
@@ -86,18 +86,82 @@ class OtherViewModel : BaseViewModel() {
         }
     }
 
+    fun cancelacionNormal() {
+        val ceh = CoroutineExceptionHandler { context, throwable -> printWithTag("Petó con ${throwable::class.simpleName}")}
+        viewModelScope.launch(ceh) {
+
+            printWithTag("Launch ${coroutineContext[Job]?.toString() ?: "Sin job"}")
+
+            val cosa = async(Dispatchers.Default) {
+                printWithTag("Async ${coroutineContext[Job]?.toString() ?: "Sin job"}")
+                usarAlgo()
+            }
+
+            launch(Dispatchers.Default) {
+                delay(4000L)
+                printWithTag("Yo tampoco me he muerto")
+            }
+
+            printWithTag("${cosa.await().isActive}")
+        }
+    }
+
+    private suspend fun usarAlgo(): Job = withContext(Dispatchers.Default) {
+        printWithTag("Dentro de algo: ${coroutineContext[Job]?.toString() ?: "Sin job"}")
+
+        cancel()
+
+        if (isActive) {
+            printWithTag("Sigo activa")
+        }
+
+        launch(Dispatchers.Default) {
+            delay(2000L)
+            printWithTag("No me he muerto")
+        }
+    }
+
+    fun usoDeSupervisorJob() {
+        val ceh = CoroutineExceptionHandler { context, throwable -> printWithTag("Petó con ${throwable::class.simpleName}")}
+        val miAmbito = CoroutineScope(SupervisorJob() + ceh)
+        miAmbito.launch(Dispatchers.Default) {
+            throw java.lang.IllegalStateException()
+        }
+
+        miAmbito.launch(Dispatchers.Default) {
+            delay(2000L)
+            printWithTag("Yo no salgo a seguir saliendo igual")
+        }
+    }
+
+
     suspend fun getLibros(idLibros: List<Int>): List<LibroDTO> {
         Thread.sleep(3000L)
         return idLibros.mapNotNull { id -> biblioteca.find { it.id == id } }
     }
 
+    suspend fun getTitulos(idLibros: List<Int>): Map<Int, String> =
+        withContext(Dispatchers.Default) {
+            delay(1000L)
+            idLibros.mapNotNull { id ->
+                biblioteca.find { it.id == id }?.titulo?.let { Pair(id, it) }
+            }.toMap()
+        }
+
+    suspend fun getISBN(idLibros: List<Int>): Map<Int, String> = withContext(Dispatchers.Default) {
+        delay(1000L)
+        idLibros.mapNotNull { id ->
+            biblioteca.find { it.id == id }?.isbn?.let { Pair(id, it) }
+        }.toMap()
+    }
+
     fun LibroDTO.toBo(): LibroBO {
         Thread.sleep(1000L)
-        return LibroBO(titulo)
+        return LibroBO(titulo, isbn)
     }
 
     fun LibroBO.toVo(): LibroVO {
         Thread.sleep(1000L)
-        return LibroVO(titulo)
+        return LibroVO(titulo, isbn)
     }
 }

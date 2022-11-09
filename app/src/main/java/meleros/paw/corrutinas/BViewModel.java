@@ -108,11 +108,11 @@ public class BViewModel extends BaseViewModel {
 
     private LibroBO toBo(final LibroDTO dto) throws InterruptedException {
         Thread.sleep(1000L);
-        return new LibroBO(dto.getTitulo());
+        return new LibroBO(dto.getTitulo(), dto.getIsbn());
     }
 
     private LibroVO toVo(final LibroBO bo) throws InterruptedException {
         Thread.sleep(1000L);
-        return new LibroVO(bo.getTitulo());
+        return new LibroVO(bo.getTitulo(), bo.getIsbn());
     }
 }

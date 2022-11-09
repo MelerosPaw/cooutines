@@ -15,11 +15,6 @@ class MainActivity : BaseActivity() {
     private var viewModel: MainViewModel? = null
     private val boton: Button by lazy { findViewById(R.id.boton) }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel?.printWithTag("onResume()")
-    }
-
     @LayoutRes
     override fun getLayout() = R.layout.activity_main
 
@@ -90,11 +85,22 @@ class MainActivity : BaseActivity() {
 //            vm.noSeCancelaPorSuspension()
 
             // No debemos cancelar scopes gestionados por Android
-            vm.nuncaCancelarScopesGestionados()
+//            vm.nuncaCancelarScopesGestionados()
 
             // Solo cancelamos el interno o el nuestro
-//            vm.cancelarScopesInternos()
+//            vm.cancelarJobsOScopesInternos()
 //            vm.cancelarScopesPropios()
+
+            // El async encapsula no lanza CancellationException hasta que se llama a await()
+//            vm.cancelarUnAsync()
+
+            // Cancelar en una función de suspensión es cancelar la corrutina en a que se te llama
+//            vm.cancelarDesdeUnaFuncionDeSuspension()
+            vm.falloVsCancelacion()
+
+            // Siendo supervisor podemos ignorar los fallos
+//            vm.serSupervisor()
+//            vm.siendoSupervisor()
 
             // Si ejecutas una en el hilo principal, el hilo se va a bloquear
 //            vm.bloquearHiloPrincipal()
@@ -153,8 +159,6 @@ class MainActivity : BaseActivity() {
 
             // Cancelar un scope interno no cancela el original
 //            vm.cancelarScopeInterno()
-
-            vm.printWithTag("Fin de onCreate()")
         }
     }
 
