@@ -710,43 +710,49 @@ class MainViewModel : BaseViewModel() {
         }
     }
 
-    fun serSupervisor() {
-        val ceh = CoroutineExceptionHandler { context, throwable -> }
-        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default + ceh)
+    val ceh = CoroutineExceptionHandler { context, throwable -> printWithTag(throwable.javaClass.name)}
+    val miScope = CoroutineScope(SupervisorJob() + Dispatchers.Default + ceh)
 
-        scope.launch {
+    fun serSupervisor() {
+        miScope.launch {
 
             launch {
                 printWithTag("Me voy a morir")
+                delay(1000L)
                 throw java.lang.Exception()
+                printWithTag("Esto no va a salir")
             }
 
             launch {
-                Thread.sleep(3000L)
-                printWithTag("Yo viviré para siempre")
+                printWithTag("Me lanzo")
+                delay(3000L)
+                printWithTag("Termino")
             }
 
-            delay(2000L)
-            printWithTag("Esto no debería salir")
+            Thread.sleep(2000L)
+            printWithTag("Esto no debería salir, pero sale")
         }
 
-        scope.launch {
+        miScope.launch {
             delay(4000L)
-            printWithTag("Esto tampoco")
+            printWithTag("Esto último no sale")
         }
     }
 
-    fun siendoSupervisor() {
-        viewModelScope.launch(Dispatchers.Default) {
-            hacerCosasSupervisadas()
+    fun otraFormaDeSupervisar() {
+        viewModelScope.launch(Dispatchers.Default + ceh) {
+            hacerCosasSuspendidas()
+            launch {
+                printWithTag("No saldría de estar cancelada")
+            }
         }
     }
 
-    private suspend fun hacerCosasSupervisadas() {
-        coroutineScope {
+    private suspend fun hacerCosasSuspendidas() {
+        supervisorScope {
             launch { throw java.lang.Exception() }
             delay(2000L)
-            launch { printWithTag("Sigo saliendo") }
+            launch { printWithTag("Yo creo que no voy ni a nacer") }
         }
     }
 

@@ -29,10 +29,11 @@ class MainActivity : BaseActivity() {
 //            startActivity(Intent(this, ActivityB::class.java))
 
             // Kotlin
-            startActivity(Intent(this, OtherActivity::class.java))
-
 //            viewModel?.cancelarJob()
 //            viewModel?.delayEstaConfabuladoConElMain()
+//            viewModel?.falloVsCancelacion()
+//            viewModel?.serSupervisor()
+//            startActivity(Intent(this, OtherActivity::class.java))
         }
 
         viewModel?.let { vm ->
@@ -96,11 +97,12 @@ class MainActivity : BaseActivity() {
 
             // Cancelar en una función de suspensión es cancelar la corrutina en a que se te llama
 //            vm.cancelarDesdeUnaFuncionDeSuspension()
-            vm.falloVsCancelacion()
+//            vm.falloVsCancelacion()
 
             // Siendo supervisor podemos ignorar los fallos
-//            vm.serSupervisor()
-//            vm.siendoSupervisor()
+            vm.otraFormaDeSupervisar()
+
+            // Un trabajo NonCancellable crea una estructura nueva de padres hijos
 
             // Si ejecutas una en el hilo principal, el hilo se va a bloquear
 //            vm.bloquearHiloPrincipal()

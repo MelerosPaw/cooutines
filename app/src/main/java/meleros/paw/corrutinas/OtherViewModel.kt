@@ -86,38 +86,21 @@ class OtherViewModel : BaseViewModel() {
         }
     }
 
-    fun cancelacionNormal() {
-        val ceh = CoroutineExceptionHandler { context, throwable -> printWithTag("Petó con ${throwable::class.simpleName}")}
-        viewModelScope.launch(ceh) {
+    fun sinCancelar() {
+//        val ceh = CoroutineExceptionHandler { context, throwable -> printWithTag(throwable.javaClass.name)}
+        viewModelScope.launch(Dispatchers.Default) {
 
-            printWithTag("Launch ${coroutineContext[Job]?.toString() ?: "Sin job"}")
-
-            val cosa = async(Dispatchers.Default) {
-                printWithTag("Async ${coroutineContext[Job]?.toString() ?: "Sin job"}")
-                usarAlgo()
+            launch(NonCancellable) {
+                repeat(Int.MAX_VALUE) {
+                    delay(1000)
+                    printWithTag("♫ Y yo sigo aquí, esperándote, que tu dulce boca ruede por mi piel ♫ ($it)")
+                }
             }
 
-            launch(Dispatchers.Default) {
-                delay(4000L)
-                printWithTag("Yo tampoco me he muerto")
+            launch {
+                delay(2000L)
+                printWithTag("Debí haberme cancelado")
             }
-
-            printWithTag("${cosa.await().isActive}")
-        }
-    }
-
-    private suspend fun usarAlgo(): Job = withContext(Dispatchers.Default) {
-        printWithTag("Dentro de algo: ${coroutineContext[Job]?.toString() ?: "Sin job"}")
-
-        cancel()
-
-        if (isActive) {
-            printWithTag("Sigo activa")
-        }
-
-        launch(Dispatchers.Default) {
-            delay(2000L)
-            printWithTag("No me he muerto")
         }
     }
 
