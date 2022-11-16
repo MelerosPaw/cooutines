@@ -17,6 +17,10 @@ open class BaseViewModel : ViewModel() {
         fun printThreadName(name: String) {
             Log.i(TAG, "$name se está ejecutando en ${Thread.currentThread().name} (${System.nanoTime()})")
         }
+
+        fun printWithTag(message: String) {
+            println("$TAG: $message")
+        }
     }
 
     protected val _loadingLiveData: MutableLiveData<Boolean> = MutableLiveData()
@@ -28,7 +32,7 @@ open class BaseViewModel : ViewModel() {
         get() = _textLiveData
 
     fun printWithTag(message: String) {
-        println("$TAG: $message")
+        BaseViewModel.printWithTag(message)
     }
 
     fun operacionMenosBloqueante(): Float = (1..100_000_000).fold(1f) { acc, i -> i * acc }

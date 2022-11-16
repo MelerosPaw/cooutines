@@ -37,8 +37,7 @@ class OtherActivity : BaseActivity() {
             botonLibros.isEnabled = false
             val ids = listOf("1", "3", "5")
 //            otherViewModel?.cooperarAntesDeCadaProcesoCostoso(ids)
-            otherViewModel?.cancelacionNormal()
-//            otherViewModel?.paranoia()
+            otherViewModel?.sinCancelar()
         }
     }
 
