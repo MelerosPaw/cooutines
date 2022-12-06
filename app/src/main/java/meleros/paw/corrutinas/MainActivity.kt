@@ -33,7 +33,7 @@ class MainActivity : BaseActivity() {
 //            viewModel?.delayEstaConfabuladoConElMain()
 //            viewModel?.falloVsCancelacion()
 //            viewModel?.serSupervisor()
-//            startActivity(Intent(this, OtherActivity::class.java))
+            startActivity(Intent(this, OtherActivity::class.java))
         }
 
         viewModel?.let { vm ->
@@ -100,7 +100,7 @@ class MainActivity : BaseActivity() {
 //            vm.falloVsCancelacion()
 
             // Siendo supervisor podemos ignorar los fallos
-            vm.otraFormaDeSupervisar()
+//            vm.otraFormaDeSupervisar()
 
             // Un trabajo NonCancellable crea una estructura nueva de padres hijos
 

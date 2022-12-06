@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.CoroutineExceptionHandler
 import java.text.DecimalFormat
 
 open class BaseViewModel : ViewModel() {
@@ -22,6 +22,8 @@ open class BaseViewModel : ViewModel() {
             println("$TAG: $message")
         }
     }
+
+    protected val exceptionHandler = CoroutineExceptionHandler { context, throwable -> printWithTag(throwable.javaClass.name)}
 
     protected val _loadingLiveData: MutableLiveData<Boolean> = MutableLiveData()
     val loadingLiveData: LiveData<Boolean>

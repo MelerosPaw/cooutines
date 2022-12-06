@@ -86,37 +86,43 @@ class OtherViewModel : BaseViewModel() {
         }
     }
 
+    suspend fun libros(ids: List<String>) {
+        withContext(NonCancellable) {
+            _loadingLiveData.postValue(true)
+
+            ensureActive()
+            printAndPost("Mapeando identificadores...")
+            val intIds = ids.mapNotNull(String::toIntOrNull)
+
+            ensureActive()
+            printAndPost("Obteniendo libros...")
+            val dtos = getLibros(intIds)
+
+            ensureActive()
+            printAndPost("Mapeando a BO...")
+            val bos = dtos.map { libro -> libro.toBo() }
+
+            ensureActive()
+            printAndPost("Mapeando a VO...")
+            val vos = bos.map { libro -> libro.toVo() }
+
+            printWithTag("Ya está")
+            librosLiveData.postValue(vos)
+            _loadingLiveData.postValue(false)
+        }
+    }
+
     fun sinCancelar() {
-//        val ceh = CoroutineExceptionHandler { context, throwable -> printWithTag(throwable.javaClass.name)}
         viewModelScope.launch(Dispatchers.Default) {
 
-            launch(NonCancellable) {
+            withContext(NonCancellable) {
                 repeat(Int.MAX_VALUE) {
                     delay(1000)
                     printWithTag("♫ Y yo sigo aquí, esperándote, que tu dulce boca ruede por mi piel ♫ ($it)")
                 }
             }
-
-            launch {
-                delay(2000L)
-                printWithTag("Debí haberme cancelado")
-            }
         }
     }
-
-    fun usoDeSupervisorJob() {
-        val ceh = CoroutineExceptionHandler { context, throwable -> printWithTag("Petó con ${throwable::class.simpleName}")}
-        val miAmbito = CoroutineScope(SupervisorJob() + ceh)
-        miAmbito.launch(Dispatchers.Default) {
-            throw java.lang.IllegalStateException()
-        }
-
-        miAmbito.launch(Dispatchers.Default) {
-            delay(2000L)
-            printWithTag("Yo no salgo a seguir saliendo igual")
-        }
-    }
-
 
     suspend fun getLibros(idLibros: List<Int>): List<LibroDTO> {
         Thread.sleep(3000L)

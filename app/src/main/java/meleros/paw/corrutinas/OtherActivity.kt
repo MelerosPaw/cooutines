@@ -35,7 +35,7 @@ class OtherActivity : BaseActivity() {
     private fun setButtonListener() {
         botonLibros.setOnClickListener {
             botonLibros.isEnabled = false
-            val ids = listOf("1", "3", "5")
+//            val ids = listOf("1", "3", "5")
 //            otherViewModel?.cooperarAntesDeCadaProcesoCostoso(ids)
             otherViewModel?.sinCancelar()
         }
