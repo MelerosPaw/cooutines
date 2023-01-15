@@ -7,6 +7,7 @@ import meleros.paw.corrutinas.business.LibroBO
 import meleros.paw.corrutinas.business.LibroDTO
 import meleros.paw.corrutinas.business.LibroVO
 import kotlin.concurrent.thread
+import kotlin.coroutines.CoroutineContext
 
 class OtherViewModel : BaseViewModel() {
 
@@ -113,14 +114,16 @@ class OtherViewModel : BaseViewModel() {
     }
 
     fun sinCancelar() {
-        viewModelScope.launch(Dispatchers.Default) {
-
-            withContext(NonCancellable) {
+        viewModelScope.launch(Dispatchers.Default + exceptionHandler) {
+            val job = launch(NonCancellable) {
                 repeat(Int.MAX_VALUE) {
                     delay(1000)
                     printWithTag("♫ Y yo sigo aquí, esperándote, que tu dulce boca ruede por mi piel ♫ ($it)")
                 }
             }
+
+            delay(2000L)
+            job.cancel()
         }
     }
 
